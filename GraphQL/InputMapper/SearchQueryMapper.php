@@ -14,11 +14,18 @@ use InvalidArgumentException;
 class SearchQueryMapper
 {
     /**
+     * @param array $inputArray
      * @return \eZ\Publish\API\Repository\Values\Content\Query
      */
     public function mapInputToQuery(array $inputArray)
     {
         $query = new Query();
+        if (isset($inputArray['offset'])) {
+            $query->offset = $inputArray['offset'];
+        }
+        if (isset($inputArray['limit'])) {
+            $query->limit = $inputArray['limit'];
+        }
         $criteria = [];
 
         if (isset($inputArray['ContentTypeIdentifier'])) {
@@ -57,6 +64,10 @@ class SearchQueryMapper
 
         if (count($criteria)) {
             $query->filter = count($criteria) > 1 ? new Query\Criterion\LogicalAnd($criteria) : $criteria[0];
+        }
+
+        if (isset($inputArray['sortBy'])) {
+            $query->sortClauses = [new $inputArray['sortBy']];
         }
 
         return $query;

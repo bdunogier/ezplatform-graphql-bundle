@@ -49,6 +49,7 @@ services:
             $contentService: '@ezpublish.siteaccessaware.service.content'
             $contentTypeService: '@ezpublish.siteaccessaware.service.content_type'
             $locationService: '@ezpublish.siteaccessaware.service.location'
+            $contentTypeHandler: '@ezpublish.spi.persistence.content_type_handler'
 
     BD\EzPlatformGraphQLBundle\GraphQL\Resolver\UserResolver:
         tags:
@@ -124,3 +125,12 @@ services:
     BD\EzPlatformGraphQLBundle\GraphQL\Resolver\SelectionFieldResolver:
         tags:
             - { name: overblog_graphql.resolver, alias: "SelectionFieldValue", method: "resolveSelectionFieldValue"}
+
+    BD\EzPlatformGraphQLBundle\GraphQL\Relay\NodeResolver:
+        tags:
+            - { name: overblog_graphql.resolver, alias: "node", method: "resolveNode" }
+            - { name: overblog_graphql.resolver, alias: "node_type", method: "resolveType" }
+
+    BD\EzPlatformGraphQLBundle\GraphQL\Relay\SearchResolver:
+        tags:
+            - {name: overblog_graphql.resolver, alias: "SearchContentConnection", method: "searchContent"}

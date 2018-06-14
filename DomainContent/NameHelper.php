@@ -30,9 +30,15 @@ class NameHelper
     {
         return $this->pluralize(lcfirst($this->toCamelCase($contentType->identifier)));
     }
+
     public function domainContentName(ContentType $contentType)
     {
         return ucfirst($this->toCamelCase($contentType->identifier)) . 'Content';
+    }
+
+    public function domainContentConnection($contentType)
+    {
+        return ucfirst($this->toCamelCase($contentType->identifier)) . 'ContentConnection';
     }
 
     public function domainContentTypeName(ContentType $contentType)

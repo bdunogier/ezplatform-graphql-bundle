@@ -23,7 +23,7 @@ class DefineDomainContent extends BaseWorker implements SchemaWorker
             'inherits' => ['AbstractDomainContent'],
             'config' => [
                 'fields' => [],
-                'interfaces' => ['DomainContent'],
+                'interfaces' => ['DomainContent', 'Node'],
             ]
         ];
 
@@ -34,6 +34,14 @@ class DefineDomainContent extends BaseWorker implements SchemaWorker
                 'interfaces' => ['DomainContentType'],
                 'fields' => []
             ],
+        ];
+
+        $schema[$this->getNameHelper()->domainContentConnection($contentType)] = [
+            'type' => 'relay-connection',
+            'config' => [
+                'nodeType' => $this->getDomainContentName($contentType),
+                'inherits' => ['DomainContentByIdentifierConnection'],
+            ]
         ];
     }
 

@@ -25,17 +25,20 @@ class AddDomainContentToDomainGroup extends BaseWorker implements SchemaWorker
             [$this->getGroupName($contentTypeGroup)]
             ['config']['fields']
             [$this->getContentCollectionField($contentType)] = [
-                'type' => sprintf("[%s]", $this->getContentName($contentType)),
-                // @todo Improve description to mention that it is a collection ?
+                'type' => $this->getNameHelper()->domainContentConnection($contentType),
                 'description' => isset($descriptions['eng-GB']) ? $descriptions['eng-GB'] : 'No description available',
                 'resolve' => sprintf(
                     '@=resolver("DomainContentItemsByTypeIdentifier", ["%s", args])',
                     $contentType->identifier
                 ),
+                'argsBuilder' => 'Relay::Connection',
                 'args' => [
                     'query' => [
                         'type' => "ContentSearchQuery",
                         'description' => "A Content query used to filter results"
+                    ],
+                    'sortBy' => [
+                        'type' => 'SortByOptions'
                     ],
                 ],
             ];
@@ -46,10 +49,11 @@ class AddDomainContentToDomainGroup extends BaseWorker implements SchemaWorker
             [$this->getContentField($contentType)] = [
                 'type' => $this->getContentName($contentType),
                 'description' => isset($descriptions['eng-GB']) ? $descriptions['eng-GB'] : 'No description available',
-                'resolve' => sprintf('@=resolver("DomainContentItem", [args, "%s"])', $contentType->identifier),
+                'resolve' => sprintf(
+                    '@=resolver("DomainContentItem", [args, "%s"])',
+                    $contentType->identifier
+                ),
                 'args' => [
-                    // @todo How do we constraint this so that it only takes an id of an item of that type ?
-                    // same approach than GlobalId ? (<type>-<id>)
                     'id' => [
                         'type' => 'Int',
                         'description' => sprintf('A %s content id', $contentType->identifier),

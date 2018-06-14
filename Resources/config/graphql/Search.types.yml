@@ -23,6 +23,22 @@ ContentSearchQuery:
             Field:
                 type: "FieldCriterionInput"
                 description: "Field filter"
+            SortBy:
+                type: "SortByOptions"
+
+SortByOptions:
+    type: enum
+    config:
+        values:
+            ContentId: '\eZ\Publish\API\Repository\Values\Content\Query\SortClause\ContentId'
+            ContentName: '\eZ\Publish\API\Repository\Values\Content\Query\SortClause\ContentName'
+            DateModified: '\eZ\Publish\API\Repository\Values\Content\Query\SortClause\DateModified'
+            DatePublished: '\eZ\Publish\API\Repository\Values\Content\Query\SortClause\DatePublished'
+            # field: not implemented yet
+            Location: '\eZ\Publish\API\Repository\Values\Content\Query\SortClause\Location'
+            # MapLocationDistance: not implemented yet
+            SectionIdentifier: '\eZ\Publish\API\Repository\Values\Content\Query\SortClause\SectionIdentifier'
+            SectionName: '\eZ\Publish\API\Repository\Values\Content\Query\SortClause\SectionName'
 
 FieldCriterionInput:
      type: "input-object"

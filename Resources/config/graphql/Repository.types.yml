@@ -15,7 +15,7 @@ Repository:
                 args:
                     id:
                         description: "Resolves using the unique Content id."
-                        type: "Int"
+                        type: "ID!"
                     remoteId:
                         description: "Resolves using the unique Content remote id."
                         type: "String"
@@ -68,10 +68,10 @@ Repository:
                     groupIdentifier:
                         type: "String"
                 resolve: "@=resolver('ContentTypesFromGroup', [args])"
-
             searchContent:
                 type: "[Content]"
                 args:
                     query:
                         type: "ContentSearchQuery!"
                 resolve: "@=resolver('SearchContent', [args])"
+

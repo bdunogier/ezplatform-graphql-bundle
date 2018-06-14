@@ -1,20 +1,25 @@
 services:
-    BD\EzPlatformGraphQLBundle\Command\GeneratePlatformDomainTypesCommand:
+    _defaults:
         autoconfigure: true
         autowire: true
+        public: false
+
+    BD\EzPlatformGraphQLBundle\Command\GeneratePlatformSchemaCommand:
         tags:
             -  { name: console.command }
 
-    BD\EzPlatformGraphQLBundle\Command\GeneratePlatformSchemaCommand:
-        autoconfigure: true
-        autowire: true
+    BD\EzPlatformGraphQLBundle\Command\GeneratePlatformDomainTypesCommand:
         tags:
             -  { name: console.command }
+
+    BD\EzPlatformGraphQLBundle\GraphQL\Resolver\LocationResolver:
+        arguments:
+            - "@ezpublish.api.repository"
 
     BD\EzPlatformGraphQLBundle\GraphQL\TypeDefinition\ContentTypeMapper: ~
 
-    bd_ezplatform_graphql.graph.mutation.section:
-        class: BD\EzPlatformGraphQLBundle\GraphQL\Mutation\SectionMutation
+
+    BD\EzPlatformGraphQLBundle\GraphQL\Mutation\SectionMutation:
         arguments:
             - "@ezpublish.api.service.section"
         tags:
