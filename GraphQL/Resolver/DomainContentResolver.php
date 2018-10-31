@@ -11,9 +11,11 @@ use eZ\Publish\API\Repository\LocationService;
 use eZ\Publish\Core\FieldType;
 use eZ\Publish\API\Repository\ContentService;
 use eZ\Publish\API\Repository\ContentTypeService;
+use eZ\Publish\API\Repository\Exceptions\InvalidArgumentException;
 use eZ\Publish\API\Repository\SearchService;
 use eZ\Publish\API\Repository\Values\Content\Content;
 use eZ\Publish\API\Repository\Values\Content\ContentInfo;
+use eZ\Publish\API\Repository\Values\Content\LocationQuery;
 use eZ\Publish\API\Repository\Values\Content\Query;
 use eZ\Publish\API\Repository\Values\Content\Search\SearchHit;
 use eZ\Publish\API\Repository\Values\ContentType\ContentType;
@@ -60,8 +62,8 @@ class DomainContentResolver
         ContentTypeService $contentTypeService,
         LocationService $locationService,
         TypeResolver $typeResolver,
-        SearchQueryMapper $queryMapper)
-    {
+        SearchQueryMapper $queryMapper
+    ) {
         $this->contentService = $contentService;
         $this->searchService = $searchService;
         $this->contentTypeService = $contentTypeService;
@@ -128,16 +130,38 @@ class DomainContentResolver
         );
     }
 
-    public function resolveDomainSearch()
+    public function resolveDomainSearch(Argument $args): array
     {
-        $searchResults = $this->searchService->findContentInfo(new Query([]));
+        if (isset($args['type'])) {
+            $queryTypeInput = (array)$args['type'];
+            $identifier = key($queryTypeInput);
+            $query = $this->queryMapper->mapQueryTypeInputToQuery(
+                $identifier,
+                $queryTypeInput[$identifier]
+            );
+        } else {
+            try {
+                $query = $this->queryMapper->mapInputToQuery(
+                    (array)$args['query'] ?? new Query()
+                );
+            } catch (InvalidArgumentException $e) {
+                return [];
+            }
+        }
 
-        return array_map(
-            function (SearchHit $searchHit) {
+        if ($query instanceof LocationQuery) {
+            $searchMethod = 'findLocations';
+            $mapFunction = function(SearchHit $searchHit) {
+                return $searchHit->valueObject->contentInfo;
+            };
+        } else {
+            $searchMethod = 'findContentInfo';
+            $mapFunction = function(SearchHit $searchHit) {
                 return $searchHit->valueObject;
-            },
-            $searchResults->searchHits
-        );
+            };
+        }
+
+        return array_map($mapFunction, $this->searchService->$searchMethod($query)->searchHits);
     }
 
     public function resolveDomainFieldValue($contentInfo, $fieldDefinitionIdentifier)

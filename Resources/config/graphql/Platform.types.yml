@@ -6,3 +6,14 @@ Platform:
                 type: Repository
                 resolve: { }
                 description: "eZ Platform repository API"
+            _search:
+                type: "[DomainContent]"
+                resolve: "@=resolver('DomainSearch', [args])"
+                description: "The results of any query"
+                args:
+                    query:
+                        type: ContentSearchQuery
+                        description: 'The content query used to get items'
+                    type:
+                        type: SearchQueryType
+                        description: 'A query type registered in the system'

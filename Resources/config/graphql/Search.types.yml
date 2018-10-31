@@ -82,3 +82,45 @@ DateCriterionOperator:
         values:
             before: {}
             after: {}
+
+SearchQueryType:
+    type: input-object
+    config:
+        fields:
+            children:
+                type: ChildrenQueryType
+            menu:
+                type: MenuQueryType
+            nearbyPlaces:
+                type: NearbyPlacesQueryType
+
+ChildrenQueryType:
+    type: input-object
+    config:
+        fields:
+            parent_location_id:
+                type: Int
+            limit:
+                type: Int
+
+MenuQueryType:
+    type: input-object
+    config:
+        fields:
+            parent_location_id:
+                type: Int
+            included_content_type_identifier:
+                type: "[ContentTypeIdentifier]"
+
+NearbyPlacesQueryType:
+    type: input-object
+    config:
+        fields:
+            latitude:
+                type: Float
+            longitude:
+                type: Float
+            distance:
+                type: Float
+            selfContentId:
+                type: Int

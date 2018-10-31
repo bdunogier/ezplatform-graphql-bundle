@@ -9,10 +9,21 @@
 namespace BD\EzPlatformGraphQLBundle\GraphQL\InputMapper;
 
 use eZ\Publish\API\Repository\Values\Content\Query;
+use eZ\Publish\Core\QueryType\QueryTypeRegistry;
 use InvalidArgumentException;
 
 class SearchQueryMapper
 {
+    /**
+     * @var QueryTypeRegistry
+     */
+    private $queryTypeRegistry;
+
+    public function __construct(QueryTypeRegistry $queryTypeRegistry)
+    {
+        $this->queryTypeRegistry = $queryTypeRegistry;
+    }
+
     /**
      * @return \eZ\Publish\API\Repository\Values\Content\Query
      */
@@ -104,5 +115,20 @@ class SearchQueryMapper
         }
 
         return $criteria;
+    }
+
+    public function mapQueryTypeInputToQuery($queryTypeIdentifier, array $parameters): Query
+    {
+        $map = [
+            'children' => 'AppBundle:Children',
+            'menu' => 'AppBundle:Menu',
+            'nearbyPlaces' => 'NearbyPlaces',
+        ];
+
+        $queryTypeIdentifier = $map[$queryTypeIdentifier];
+
+        return $this
+            ->queryTypeRegistry->getQueryType($queryTypeIdentifier)
+            ->getQuery($parameters);
     }
 }
