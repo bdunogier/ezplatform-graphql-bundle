@@ -131,35 +131,37 @@ class DomainContentResolver
         return isset($aliases[0]->path) ? $aliases[0]->path : null;
     }
 
-    public function createDomainContent($input, $contentTypeIdentifier)
+    public function createDomainContent($input, $contentTypeIdentifier, $parentLocationId, $language = 'eng-GB')
     {
         $contentType = $this->getContentTypeService()->loadContentTypeByIdentifier($contentTypeIdentifier);
 
-        $contentCreateStruct = $this->getContentService()->newContentCreateStruct($contentType, 'eng-GB');
+        $contentCreateStruct = $this->getContentService()->newContentCreateStruct($contentType, $language);
         foreach ($contentType->getFieldDefinitions() as $fieldDefinition) {
             if (isset($input[$fieldDefinition->identifier])) {
-                if (!in_array($fieldDefinition->fieldTypeIdentifier, ['ezstring', 'eztext', 'ezrichtext'])) {
+                if (!in_array($fieldDefinition->fieldTypeIdentifier, ['ezstring', 'eztext', 'ezrichtext', 'ezauthor'])) {
                     continue;
                 }
-                $fieldValue = $input[$fieldDefinition->identifier];
-                $contentCreateStruct->setField($fieldDefinition->identifier, $fieldValue);
+                if ($fieldDefinition->fieldTypeIdentifier === 'ezauthor') {
+                    $authors = [];
+                    foreach ($input[$fieldDefinition->identifier] as $authorInput) {
+                        $authors[] = new FieldType\Author\Author($authorInput);
+                    }
+                    $fieldValue = new FieldType\Author\Value($authors);
+                } else {
+                    $fieldValue = $input[$fieldDefinition->identifier];
+                }
+                $contentCreateStruct->setField($fieldDefinition->identifier, $fieldValue, $language);
             }
         }
-
-        $contentCreateStruct->setField(
-            'author',
-            new FieldType\Author\Value([
-                new FieldType\Author\Author(['name' => 'Bertrand Dunogier', 'email' => 'bd@ez.no'])
-            ])
-        );
 
         try {
             $contentDraft = $this->getContentService()->createContent(
                 $contentCreateStruct,
-                [$this->getLocationService()->newLocationCreateStruct(216)]
+                [$this->getLocationService()->newLocationCreateStruct($parentLocationId)]
             );
         }
         catch (ContentFieldValidationException $e) {
+            reset($e->getFieldErrors());
             $fieldError = current($e->getFieldErrors());
             $error = str_replace($fieldError['eng-GB'], array_keys($fieldError['values']), array_values($fieldError['values']));
             throw new UserError($error);

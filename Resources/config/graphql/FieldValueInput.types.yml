@@ -1,0 +1,10 @@
+AuthorInput:
+    type: input-object
+    config:
+        fields:
+            id:
+                type: "Int"
+            name:
+                type: "String"
+            email:
+                type: "String"
