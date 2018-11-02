@@ -40,16 +40,12 @@ class AddFieldDefinitionToDomainContent extends BaseWorker implements SchemaWork
 
         $schema[$domainContentName]['config']['fields'][$fieldDefinitionField] = $this->getDefinition($fieldDefinition);
 
-        $descriptions = $fieldDefinition->getDescriptions();
-        if (isset($descriptions['eng-GB'])) {
-            $fields[$fieldDefinitionField]['description'] = $descriptions['eng-GB'];
-        }
-
         $schema
             [$this->getNameHelper()->domainContentTypeName($args['ContentType'])]
             ['config']['fields']
             [$fieldDefinitionField] = [
                 'type' => $this->getFieldDefinitionType($args['FieldDefinition']),
+                'description' => $fieldDefinition->getDescriptions()['eng-GB'] ?? '',
                 'resolve' => sprintf(
                     '@=value.getFieldDefinition("%s")',
                     $args['FieldDefinition']->identifier

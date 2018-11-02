@@ -30,9 +30,15 @@ class NameHelper
     {
         return $this->pluralize(lcfirst($this->toCamelCase($contentType->identifier)));
     }
+
     public function domainContentName(ContentType $contentType)
     {
         return ucfirst($this->toCamelCase($contentType->identifier)) . 'Content';
+    }
+
+    public function domainContentInputName(ContentType $contentType)
+    {
+        return ucfirst($this->toCamelCase($contentType->identifier)) . 'ContentInput';
     }
 
     public function domainContentTypeName(ContentType $contentType)
@@ -44,6 +50,12 @@ class NameHelper
     {
         return lcfirst($this->toCamelCase($contentType->identifier));
     }
+
+    public function domainMutationCreateField($contentType)
+    {
+        return 'create' . ucfirst($this->domainContentField($contentType));
+    }
+
 
     public function domainGroupName(ContentTypeGroup $contentTypeGroup)
     {
