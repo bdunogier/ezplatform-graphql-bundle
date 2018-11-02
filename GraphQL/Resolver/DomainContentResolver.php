@@ -7,12 +7,9 @@ namespace BD\EzPlatformGraphQLBundle\GraphQL\Resolver;
 
 use BD\EzPlatformGraphQLBundle\GraphQL\InputMapper\SearchQueryMapper;
 use BD\EzPlatformGraphQLBundle\GraphQL\Value\ContentFieldValue;
-use eZ\Publish\API\Repository\LocationService;
+use eZ\Publish\API\Repository\Exceptions\ContentFieldValidationException;
 use eZ\Publish\API\Repository\Repository;
 use eZ\Publish\Core\FieldType;
-use eZ\Publish\API\Repository\ContentService;
-use eZ\Publish\API\Repository\ContentTypeService;
-use eZ\Publish\API\Repository\SearchService;
 use eZ\Publish\API\Repository\Values\Content\Content;
 use eZ\Publish\API\Repository\Values\Content\ContentInfo;
 use eZ\Publish\API\Repository\Values\Content\Query;
@@ -20,6 +17,7 @@ use eZ\Publish\API\Repository\Values\Content\Search\SearchHit;
 use eZ\Publish\API\Repository\Values\ContentType\ContentType;
 use GraphQL\Error\UserError;
 use Overblog\GraphQLBundle\Definition\Argument;
+use Overblog\GraphQLBundle\Error\UserWarning;
 use Overblog\GraphQLBundle\Resolver\TypeResolver;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 
@@ -131,6 +129,45 @@ class DomainContentResolver
         );
 
         return isset($aliases[0]->path) ? $aliases[0]->path : null;
+    }
+
+    public function createDomainContent($input, $contentTypeIdentifier)
+    {
+        $contentType = $this->getContentTypeService()->loadContentTypeByIdentifier($contentTypeIdentifier);
+
+        $contentCreateStruct = $this->getContentService()->newContentCreateStruct($contentType, 'eng-GB');
+        foreach ($contentType->getFieldDefinitions() as $fieldDefinition) {
+            if (isset($input[$fieldDefinition->identifier])) {
+                if (!in_array($fieldDefinition->fieldTypeIdentifier, ['ezstring', 'eztext', 'ezrichtext'])) {
+                    continue;
+                }
+                $fieldValue = $input[$fieldDefinition->identifier];
+                $contentCreateStruct->setField($fieldDefinition->identifier, $fieldValue);
+            }
+        }
+
+        $contentCreateStruct->setField(
+            'author',
+            new FieldType\Author\Value([
+                new FieldType\Author\Author(['name' => 'Bertrand Dunogier', 'email' => 'bd@ez.no'])
+            ])
+        );
+
+        try {
+            $contentDraft = $this->getContentService()->createContent(
+                $contentCreateStruct,
+                [$this->getLocationService()->newLocationCreateStruct(216)]
+            );
+        }
+        catch (ContentFieldValidationException $e) {
+            $fieldError = current($e->getFieldErrors());
+            $error = str_replace($fieldError['eng-GB'], array_keys($fieldError['values']), array_values($fieldError['values']));
+            throw new UserError($error);
+        }
+
+        $content = $this->getContentService()->publishVersion($contentDraft->versionInfo);
+
+        return $content->contentInfo;
     }
 
     public function resolveDomainFieldValue($contentInfo, $fieldDefinitionIdentifier)
