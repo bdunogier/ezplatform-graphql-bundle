@@ -54,3 +54,20 @@ BlogPostContentInput:
             #    type: GenericFieldValue
             #    resolve: '@=resolver("DomainFieldValue", [value, "metas"])'
 ```
+
+Update domain content mutation:
+```
+DomainContentMutation:
+    config:
+        fields:
+            # @todo Generate
+            updateBlogPost:
+                type: BlogPostContent!
+                resolve: '@=mutation("UpdateDomainContent", [args["input"], "blog_post", args["id"], args["versionNo"]])'
+                args:
+                    id:  { type: ID, description: "ID of the content item to update" }
+                    contentId:  { type: Int, description: "ID of the content item to update" }
+                    versionNo: { type: Int, description: "Optional version number to update. If it is a draft, it is saved, not published. If it is archived, it is used as the source version for the update, to complete missing fields."}
+                    input: { type: BlogPostContentInput }
+                    language: { type: String, defaultValue: eng-GB }
+```

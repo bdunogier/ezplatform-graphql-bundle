@@ -17,7 +17,7 @@ use eZ\Publish\API\Repository\Values\Content\Search\SearchHit;
 use eZ\Publish\API\Repository\Values\ContentType\ContentType;
 use GraphQL\Error\UserError;
 use Overblog\GraphQLBundle\Definition\Argument;
-use Overblog\GraphQLBundle\Error\UserWarning;
+use Overblog\GraphQLBundle\Relay\Node\GlobalId;
 use Overblog\GraphQLBundle\Resolver\TypeResolver;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 
@@ -172,6 +172,38 @@ class DomainContentResolver
         return $content->contentInfo;
     }
 
+    public function deleteDomainContent(Argument $args)
+    {
+        $globalId = null;
+
+        if (isset($args['id'])) {
+            $globalId = $args['id'];
+            $idArray = GlobalId::fromGlobalId($args['id']);
+            $contentId = $idArray['id'];
+        } elseif (isset($args['contentId'])) {
+            $contentId = $args['contentId'];
+        } else {
+            throw new UserError("One argument out of id or contentId is required");
+        }
+
+        $contentInfo = $this->getContentService()->loadContentInfo($contentId);
+        if (!isset($globalId)) {
+            $globalId = GlobalId::toGlobalId(
+                $this->resolveDomainContentType($contentInfo),
+                $contentId
+            );
+        }
+        
+        // @todo check type of domain object
+
+        $this->getContentService()->deleteContent($contentInfo);
+
+        return [
+            'id' => $globalId,
+            'contentId' => $contentId,
+        ];
+    }
+
     public function resolveDomainFieldValue($contentInfo, $fieldDefinitionIdentifier)
     {
         $content = $this->getContentService()->loadContent($contentInfo->id);
@@ -209,7 +241,7 @@ class DomainContentResolver
         }
     }
 
-    public function ResolveDomainContentType(ContentInfo $contentInfo)
+    public function resolveDomainContentType(ContentInfo $contentInfo)
     {
         static $contentTypesMap = [], $contentTypesLoadErrors = [];
 

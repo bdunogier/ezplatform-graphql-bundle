@@ -23,6 +23,7 @@ class DefineDomainContentMutation extends BaseWorker implements SchemaWorker
         if (!isset($schema['DomainContentMutation'])) {
             $schema['DomainContentMutation'] = [
                 'type' => 'object',
+                'inherits' => ['PlatformMutation'],
                 'config' => [
                     'fields' => []
                 ]

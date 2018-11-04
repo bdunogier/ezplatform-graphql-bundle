@@ -44,15 +44,14 @@ class BDEzPlatformGraphQLExtension extends Extension implements PrependExtension
 
     private function getGraphQLConfig()
     {
-        $schemaFilePath = self::DOMAIN_SCHEMA_FILE;
+        $schema['platform'] = ['query' => 'Platform', 'mutation' => 'PlatformMutation'];
 
-        if (!file_exists($schemaFilePath)) {
-            $schema['platform'] = ['query' => 'Platform'];
-        } else {
-            $schema['platform'] = ['query' => 'Domain'];
-            if (file_exists(self::DOMAIN_MUTATION_FILE)) {
-                $schema['platform']['mutation'] = 'DomainContentMutation';
-            }
+        if (file_exists(self::DOMAIN_SCHEMA_FILE)) {
+            $schema['platform']['query'] = 'Domain';
+        }
+
+        if (file_exists(self::DOMAIN_MUTATION_FILE)) {
+            $schema['platform']['mutation'] = 'DomainContentMutation';
         }
 
         // Deprecated, use the default schema with the '_repository field instead.
