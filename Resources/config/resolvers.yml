@@ -48,6 +48,7 @@ services:
             - { name: overblog_graphql.resolver, alias: "MainUrlAlias", method: "resolveMainUrlAlias" }
             - { name: overblog_graphql.mutation, alias: "CreateDomainContent", method: "createDomainContent" }
             - { name: overblog_graphql.mutation, alias: "DeleteDomainContent", method: "deleteDomainContent" }
+            - { name: overblog_graphql.mutation, alias: "UpdateDomainContent", method: "updateDomainContent" }
         arguments:
             $repository: "@ezpublish.siteaccessaware.repository"
 

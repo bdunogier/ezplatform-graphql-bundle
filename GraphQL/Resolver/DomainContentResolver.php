@@ -5,16 +5,17 @@
  */
 namespace BD\EzPlatformGraphQLBundle\GraphQL\Resolver;
 
+use BD\EzPlatformGraphQLBundle\Exception\UnsupportedFieldTypeException;
 use BD\EzPlatformGraphQLBundle\GraphQL\InputMapper\SearchQueryMapper;
 use BD\EzPlatformGraphQLBundle\GraphQL\Value\ContentFieldValue;
 use eZ\Publish\API\Repository\Exceptions\ContentFieldValidationException;
-use eZ\Publish\API\Repository\Repository;
 use eZ\Publish\Core\FieldType;
 use eZ\Publish\API\Repository\Values\Content\Content;
 use eZ\Publish\API\Repository\Values\Content\ContentInfo;
 use eZ\Publish\API\Repository\Values\Content\Query;
 use eZ\Publish\API\Repository\Values\Content\Search\SearchHit;
 use eZ\Publish\API\Repository\Values\ContentType\ContentType;
+use eZ\Publish\API\Repository;
 use GraphQL\Error\UserError;
 use Overblog\GraphQLBundle\Definition\Argument;
 use Overblog\GraphQLBundle\Relay\Node\GlobalId;
@@ -39,7 +40,7 @@ class DomainContentResolver
     private $repository;
 
     public function __construct(
-        Repository $repository,
+        Repository\Repository $repository,
         TypeResolver $typeResolver,
         SearchQueryMapper $queryMapper)
     {
@@ -51,7 +52,7 @@ class DomainContentResolver
     public function resolveDomainContentItems($contentTypeIdentifier, $query = null)
     {
         return array_map(
-            function (Content $content) {
+            function (Repository\Values\Content\Content $content) {
                 return $content->contentInfo;
             },
             $this->findContentItemsByTypeIdentifier($contentTypeIdentifier, $query)
@@ -102,7 +103,7 @@ class DomainContentResolver
         $searchResults = $this->getSearchService()->findContent($query);
 
         return array_map(
-            function (SearchHit $searchHit) {
+            function (Repository\Values\Content\Search\SearchHit $searchHit) {
                 return $searchHit->valueObject;
             },
             $searchResults->searchHits
@@ -114,7 +115,7 @@ class DomainContentResolver
         $searchResults = $this->getSearchService()->findContentInfo(new Query([]));
 
         return array_map(
-            function (SearchHit $searchHit) {
+            function (Repository\Values\Content\Search\SearchHit $searchHit) {
                 return $searchHit->valueObject;
             },
             $searchResults->searchHits
@@ -131,25 +132,98 @@ class DomainContentResolver
         return isset($aliases[0]->path) ? $aliases[0]->path : null;
     }
 
-    public function createDomainContent($input, $contentTypeIdentifier, $parentLocationId, $language = 'eng-GB')
+    public function updateDomainContent($input, Argument $args, $language): Repository\Values\Content\ContentInfo
+    {
+        if (isset($args['id'])) {
+            $idArray = GlobalId::fromGlobalId($args['id']);
+            $contentId = $idArray['id'];
+        } elseif (isset($args['contentId'])) {
+            $contentId = $args['contentId'];
+        } else {
+            throw new UserError("One argument out of id or contentId is required");
+        }
+
+        try {
+            $contentInfo = $this->getContentService()->loadContentInfo($contentId);
+        } catch (Repository\Exceptions\NotFoundException $e) {
+            throw new UserError("Content with id $contentId could not be loaded");
+        } catch (Repository\Exceptions\UnauthorizedException $e) {
+            throw new UserError("You are not authorized to load this content");
+        }
+        try {
+            $contentType = $this->getContentTypeService()->loadContentType($contentInfo->contentTypeId);
+        } catch (Repository\Exceptions\NotFoundException $e) {
+            throw new UserError("Content type with id $contentInfo->contentTypeId could not be loaded");
+        }
+        $versionNo = $args['versionNo'] ?? null;
+
+        $contentUpdateStruct = $this->getContentService()->newContentUpdateStruct();
+
+        foreach ($contentType->getFieldDefinitions() as $fieldDefinition) {
+            if (isset($input[$fieldDefinition->identifier])) {
+                try {
+                    $contentUpdateStruct->setField(
+                        $fieldDefinition->identifier,
+                        $this->getInputFieldValue($input, $fieldDefinition),
+                        $language
+                    );
+                } catch (UnsupportedFieldTypeException $e) {
+                    continue;
+                }
+            }
+        }
+
+        if (!isset($versionNo)) {
+            try {
+                $versionInfo = $this->getContentService()->createContentDraft($contentInfo)->versionInfo;
+            } catch (Repository\Exceptions\UnauthorizedException $e) {
+                throw new UserError("You are not authorized to create a draft of this content");
+            }
+        } else {
+            try {
+                $versionInfo = $this->getContentService()->loadVersionInfo($contentInfo, $versionNo);
+            } catch (Repository\Exceptions\NotFoundException $e) {
+                throw new UserError("Version $versionNo was not found");
+            } catch (Repository\Exceptions\UnauthorizedException $e) {
+                throw new UserError("You are not authorized to load this version");
+            }
+            if ($versionInfo->status !== Repository\Values\Content\VersionInfo::STATUS_DRAFT) {
+                try {
+                    $versionInfo = $this->getContentService()->createContentDraft($contentInfo, $versionNo)->versionInfo;
+                } catch (Repository\Exceptions\UnauthorizedException $e) {
+                    throw new UserError("You are not authorized to create a draft from this version");
+                }
+            }
+        }
+
+        try {
+            $contentDraft = $this->getContentService()->updateContent($versionInfo, $contentUpdateStruct);
+        } catch (ContentFieldValidationException $e) {
+            throw new UserError("The given input did not validate: " . $e->getMessage());
+        } catch (Repository\Exceptions\ContentValidationException $e) {
+            throw new UserError("The given input did not validate: " . $e->getMessage());
+        } catch (Repository\Exceptions\UnauthorizedException $e) {
+            throw new UserError("You are not authorized to update this version");
+        }
+        try {
+            $this->getContentService()->publishVersion($contentDraft->versionInfo);
+        } catch (Repository\Exceptions\BadStateException $e) {
+            return [];
+        } catch (Repository\Exceptions\UnauthorizedException $e) {
+            throw new UserError("You are not authorized to publish this version");
+        }
+
+        return $this->getContentService()->loadContent($contentDraft->id)->contentInfo;
+    }
+
+    public function createDomainContent($input, $contentTypeIdentifier, $parentLocationId, $language)
     {
         $contentType = $this->getContentTypeService()->loadContentTypeByIdentifier($contentTypeIdentifier);
 
         $contentCreateStruct = $this->getContentService()->newContentCreateStruct($contentType, $language);
         foreach ($contentType->getFieldDefinitions() as $fieldDefinition) {
             if (isset($input[$fieldDefinition->identifier])) {
-                if (!in_array($fieldDefinition->fieldTypeIdentifier, ['ezstring', 'eztext', 'ezrichtext', 'ezauthor'])) {
-                    continue;
-                }
-                if ($fieldDefinition->fieldTypeIdentifier === 'ezauthor') {
-                    $authors = [];
-                    foreach ($input[$fieldDefinition->identifier] as $authorInput) {
-                        $authors[] = new FieldType\Author\Author($authorInput);
-                    }
-                    $fieldValue = new FieldType\Author\Value($authors);
-                } else {
-                    $fieldValue = $input[$fieldDefinition->identifier];
-                }
+                $fieldValue = $this->getInputFieldValue($input, $fieldDefinition);
                 $contentCreateStruct->setField($fieldDefinition->identifier, $fieldValue, $language);
             }
         }
@@ -241,7 +315,7 @@ class DomainContentResolver
         }
     }
 
-    public function resolveDomainContentType(ContentInfo $contentInfo)
+    public function resolveDomainContentType(Repository\Values\Content\ContentInfo $contentInfo)
     {
         static $contentTypesMap = [], $contentTypesLoadErrors = [];
 
@@ -257,13 +331,14 @@ class DomainContentResolver
         return $this->makeDomainContentTypeName($contentTypesMap[$contentInfo->contentTypeId]);
     }
 
-    private function makeDomainContentTypeName(ContentType $contentType)
+    private function makeDomainContentTypeName(Repository\Values\ContentType\ContentType $contentType)
     {
         $converter = new CamelCaseToSnakeCaseNameConverter(null, false);
 
         return $converter->denormalize($contentType->identifier) . 'Content';
     }
 
+<<<<<<< HEAD
     public function resolveContentName(ContentInfo $contentInfo)
     {
         return $this->repository->getContentService()->loadContentByContentInfo($contentInfo)->getName();
@@ -299,5 +374,24 @@ class DomainContentResolver
     private function getSearchService()
     {
         return $this->repository->getSearchService();
+=======
+    private function getInputFieldValue($input, Repository\Values\ContentType\FieldDefinition $fieldDefinition)
+    {
+        if (!in_array($fieldDefinition->fieldTypeIdentifier, ['ezstring', 'eztext', 'ezrichtext', 'ezauthor'])) {
+            throw new UnsupportedFieldTypeException($fieldDefinition->fieldTypeIdentifier, 'input');
+        }
+
+        if ($fieldDefinition->fieldTypeIdentifier === 'ezauthor') {
+            $authors = [];
+            foreach ($input[$fieldDefinition->identifier] as $authorInput) {
+                $authors[] = new FieldType\Author\Author($authorInput);
+            }
+            $fieldValue = new FieldType\Author\Value($authors);
+        } else {
+            $fieldValue = $input[$fieldDefinition->identifier];
+        }
+
+        return $fieldValue;
+>>>>>>> Implemented update domain content mutation
     }
 }
