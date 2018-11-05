@@ -20,6 +20,7 @@ use GraphQL\Error\UserError;
 use Overblog\GraphQLBundle\Definition\Argument;
 use Overblog\GraphQLBundle\Relay\Node\GlobalId;
 use Overblog\GraphQLBundle\Resolver\TypeResolver;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 
 class DomainContentResolver
@@ -377,7 +378,7 @@ class DomainContentResolver
 =======
     private function getInputFieldValue($input, Repository\Values\ContentType\FieldDefinition $fieldDefinition)
     {
-        if (!in_array($fieldDefinition->fieldTypeIdentifier, ['ezstring', 'eztext', 'ezrichtext', 'ezauthor'])) {
+        if (!in_array($fieldDefinition->fieldTypeIdentifier, ['ezstring', 'ezimage', 'eztext', 'ezrichtext', 'ezauthor'])) {
             throw new UnsupportedFieldTypeException($fieldDefinition->fieldTypeIdentifier, 'input');
         }
 
@@ -387,6 +388,19 @@ class DomainContentResolver
                 $authors[] = new FieldType\Author\Author($authorInput);
             }
             $fieldValue = new FieldType\Author\Value($authors);
+        } elseif ($fieldDefinition->fieldTypeIdentifier === 'ezimage') {
+            $fieldInput = $input[$fieldDefinition->identifier];
+
+            if (!$fieldInput['file'] instanceof UploadedFile) {
+                return null;
+            }
+            $file = $fieldInput['file'];
+            $fieldValue = new FieldType\Image\Value([
+                'alternativeText' => $fieldInput['alternativeText'] ?? '',
+                'fileName' => $file->getClientOriginalName(),
+                'inputUri' => $file->getPathname(),
+                'fileSize' => $file->getSize(),
+            ]);
         } else {
             $fieldValue = $input[$fieldDefinition->identifier];
         }

@@ -127,3 +127,5 @@ services:
     BD\EzPlatformGraphQLBundle\GraphQL\Resolver\SelectionFieldResolver:
         tags:
             - { name: overblog_graphql.resolver, alias: "SelectionFieldValue", method: "resolveSelectionFieldValue"}
+
+    BD\EzPlatformGraphQLBundle\GraphQL\Resolver\Map\UploadMap: ~

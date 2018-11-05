@@ -85,7 +85,7 @@ class AddFieldDefinitionToDomainContentMutation extends BaseWorker implements Sc
             'ezmediafile' => 'String',
             'ezfloat' => 'Float',
             // @todo needs custom input for other fields
-            'ezimage' => 'String',
+            'ezimage' => 'ImageFieldInput',
             'ezinteger' => 'Int',
             'ezmedia' => 'String',
             'ezobjectrelation' => 'Int',

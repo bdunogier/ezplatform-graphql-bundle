@@ -23,3 +23,19 @@ DeleteContentPayload:
             id:
                 type: ID
                 description: "Global ID"
+
+ImageFieldInput:
+    type: input-object
+    config:
+        fields:
+            name:
+                type: String
+            alternativeText:
+                type: String
+            file:
+                type: ImageUpload
+
+ImageUpload:
+    type: custom-scalar
+    config:
+        scalarType: '@=newObject("Overblog\\GraphQLBundle\\Upload\\Type\\GraphQLUploadType")'

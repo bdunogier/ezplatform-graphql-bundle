@@ -44,7 +44,13 @@ class BDEzPlatformGraphQLExtension extends Extension implements PrependExtension
 
     private function getGraphQLConfig()
     {
-        $schema['platform'] = ['query' => 'Platform', 'mutation' => 'PlatformMutation'];
+        $schema = [
+            'platform' => [
+                'query' => 'Platform',
+                'mutation' => 'PlatformMutation',
+                'resolver_maps' => ['BD\EzPlatformGraphQLBundle\GraphQL\Resolver\Map\UploadMap'],
+            ]
+        ];
 
         if (file_exists(self::DOMAIN_SCHEMA_FILE)) {
             $schema['platform']['query'] = 'Domain';
