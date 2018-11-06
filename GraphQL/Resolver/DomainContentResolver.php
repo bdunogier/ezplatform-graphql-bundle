@@ -391,6 +391,20 @@ HTML5EDIT;
                 $dom->loadXML($input);
                 $docbook = $this->richTextConverter->convert($dom);
                 $fieldValue = new FieldType\RichText\Value($docbook);
+            } elseif ($format === 'markdown') {
+                $parseDown = new \Parsedown();
+                $html = $parseDown->text($input);
+                $input = <<<HTML5EDIT
+<section xmlns="http://ez.no/namespaces/ezpublish5/xhtml5/edit">$html</section>
+HTML5EDIT;
+                $dom = new \DOMDocument();
+                $dom->loadXML($input);
+                $docbook = $this->richTextConverter->convert($dom);
+                $fieldValue = new FieldType\RichText\Value($docbook);
+            } elseif ($format === 'docbook') {
+                $fieldValue = new FieldType\RichText\Value($input);
+            } else {
+                throw new UserError("Unsupported richtext input format $format");
             }
         } else {
             $fieldValue = $input[$fieldDefinition->identifier];
