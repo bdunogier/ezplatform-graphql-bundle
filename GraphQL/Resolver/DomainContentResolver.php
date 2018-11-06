@@ -16,6 +16,7 @@ use eZ\Publish\API\Repository\Values\Content\Query;
 use eZ\Publish\API\Repository\Values\Content\Search\SearchHit;
 use eZ\Publish\API\Repository\Values\ContentType\ContentType;
 use eZ\Publish\API\Repository;
+use eZ\Publish\Core\FieldType\RichText\Converter;
 use GraphQL\Error\UserError;
 use Overblog\GraphQLBundle\Definition\Argument;
 use Overblog\GraphQLBundle\Relay\Node\GlobalId;
@@ -36,18 +37,25 @@ class DomainContentResolver
     private $queryMapper;
 
     /**
-     * @var Repository
+     * @var Repository\Repository
      */
     private $repository;
+
+    /**
+     * @var Converter
+     */
+    private $richTextConverter;
 
     public function __construct(
         Repository\Repository $repository,
         TypeResolver $typeResolver,
-        SearchQueryMapper $queryMapper)
+        SearchQueryMapper $queryMapper,
+        Converter $richTextConverter)
     {
         $this->repository = $repository;
         $this->typeResolver = $typeResolver;
         $this->queryMapper = $queryMapper;
+        $this->richTextConverter = $richTextConverter;
     }
 
     public function resolveDomainContentItems($contentTypeIdentifier, $query = null)
@@ -339,10 +347,56 @@ class DomainContentResolver
         return $converter->denormalize($contentType->identifier) . 'Content';
     }
 
-<<<<<<< HEAD
     public function resolveContentName(ContentInfo $contentInfo)
     {
         return $this->repository->getContentService()->loadContentByContentInfo($contentInfo)->getName();
+    }
+
+    private function getInputFieldValue($input, Repository\Values\ContentType\FieldDefinition $fieldDefinition)
+    {
+        $supportedInputTypes = ['ezstring', 'ezimage', 'eztext', 'ezrichtext', 'ezauthor'];
+        if (!in_array($fieldDefinition->fieldTypeIdentifier, $supportedInputTypes)) {
+            throw new UnsupportedFieldTypeException($fieldDefinition->fieldTypeIdentifier, 'input');
+        }
+
+        if ($fieldDefinition->fieldTypeIdentifier === 'ezauthor') {
+            $authors = [];
+            foreach ($input[$fieldDefinition->identifier] as $authorInput) {
+                $authors[] = new FieldType\Author\Author($authorInput);
+            }
+            $fieldValue = new FieldType\Author\Value($authors);
+        } elseif ($fieldDefinition->fieldTypeIdentifier === 'ezimage') {
+            $fieldInput = $input[$fieldDefinition->identifier];
+
+            if (!$fieldInput['file'] instanceof UploadedFile) {
+                return null;
+            }
+            $file = $fieldInput['file'];
+            $fieldValue = new FieldType\Image\Value([
+                'alternativeText' => $fieldInput['alternativeText'] ?? '',
+                'fileName' => $file->getClientOriginalName(),
+                'inputUri' => $file->getPathname(),
+                'fileSize' => $file->getSize(),
+            ]);
+        } elseif ($fieldDefinition->fieldTypeIdentifier === 'ezrichtext') {
+            $format = $input[$fieldDefinition->identifier]['format'];
+            $input = $input[$fieldDefinition->identifier]['input'];
+
+            if ($format === 'html') {
+                $input = <<<HTML5EDIT
+<section xmlns="http://ez.no/namespaces/ezpublish5/xhtml5/edit">$input</section>
+HTML5EDIT;
+
+                $dom = new \DOMDocument();
+                $dom->loadXML($input);
+                $docbook = $this->richTextConverter->convert($dom);
+                $fieldValue = new FieldType\RichText\Value($docbook);
+            }
+        } else {
+            $fieldValue = $input[$fieldDefinition->identifier];
+        }
+
+        return $fieldValue;
     }
 
     /**
@@ -375,37 +429,5 @@ class DomainContentResolver
     private function getSearchService()
     {
         return $this->repository->getSearchService();
-=======
-    private function getInputFieldValue($input, Repository\Values\ContentType\FieldDefinition $fieldDefinition)
-    {
-        if (!in_array($fieldDefinition->fieldTypeIdentifier, ['ezstring', 'ezimage', 'eztext', 'ezrichtext', 'ezauthor'])) {
-            throw new UnsupportedFieldTypeException($fieldDefinition->fieldTypeIdentifier, 'input');
-        }
-
-        if ($fieldDefinition->fieldTypeIdentifier === 'ezauthor') {
-            $authors = [];
-            foreach ($input[$fieldDefinition->identifier] as $authorInput) {
-                $authors[] = new FieldType\Author\Author($authorInput);
-            }
-            $fieldValue = new FieldType\Author\Value($authors);
-        } elseif ($fieldDefinition->fieldTypeIdentifier === 'ezimage') {
-            $fieldInput = $input[$fieldDefinition->identifier];
-
-            if (!$fieldInput['file'] instanceof UploadedFile) {
-                return null;
-            }
-            $file = $fieldInput['file'];
-            $fieldValue = new FieldType\Image\Value([
-                'alternativeText' => $fieldInput['alternativeText'] ?? '',
-                'fileName' => $file->getClientOriginalName(),
-                'inputUri' => $file->getPathname(),
-                'fileSize' => $file->getSize(),
-            ]);
-        } else {
-            $fieldValue = $input[$fieldDefinition->identifier];
-        }
-
-        return $fieldValue;
->>>>>>> Implemented update domain content mutation
     }
 }

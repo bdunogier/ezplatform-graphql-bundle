@@ -51,6 +51,7 @@ services:
             - { name: overblog_graphql.mutation, alias: "UpdateDomainContent", method: "updateDomainContent" }
         arguments:
             $repository: "@ezpublish.siteaccessaware.repository"
+            $richTextConverter: '@ezpublish.fieldType.ezrichtext.converter.input.xhtml5'
 
     BD\EzPlatformGraphQLBundle\GraphQL\Resolver\UserResolver:
         tags:

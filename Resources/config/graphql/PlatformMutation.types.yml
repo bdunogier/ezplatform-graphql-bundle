@@ -39,3 +39,12 @@ ImageUpload:
     type: custom-scalar
     config:
         scalarType: '@=newObject("Overblog\\GraphQLBundle\\Upload\\Type\\GraphQLUploadType")'
+
+RichTextFieldInput:
+    type: input-object
+    config:
+        fields:
+            format:
+                type: String
+            input:
+                type: String

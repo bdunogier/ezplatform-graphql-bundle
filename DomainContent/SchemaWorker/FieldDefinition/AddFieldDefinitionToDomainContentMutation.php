@@ -91,7 +91,7 @@ class AddFieldDefinitionToDomainContentMutation extends BaseWorker implements Sc
             'ezobjectrelation' => 'Int',
             'ezobjectrelationlist' => '[Int]',
             // @todo multi-input format, with type + richtext ?
-            'ezrichtext' => 'String',
+            'ezrichtext' => 'RichTextFieldInput',
             'ezstring' => 'String',
             // @todo might be multiple.
             'ezselection' => 'Int',
