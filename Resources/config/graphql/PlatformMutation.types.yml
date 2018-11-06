@@ -12,6 +12,24 @@ PlatformMutation:
                     contentId:
                         type: Int
                         description: "ID of the content item to delete"
+            uploadFiles:
+                type: UploadedFilesPayload
+                resolve: '@=mutation("UploadFiles", [args])'
+                args:
+                    locationId:
+                        type: Int!
+                        description: "The location ID of a container to upload the files to"
+                    files:
+                        type: "[ImageUpload]!"
+
+UploadedFilesPayload:
+    type: object
+    config:
+        fields:
+            files:
+                type: "[DomainContent]"
+            warnings:
+                type: "[String]"
 
 DeleteContentPayload:
     type: object

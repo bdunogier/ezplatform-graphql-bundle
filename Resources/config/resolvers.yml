@@ -53,6 +53,12 @@ services:
             $repository: "@ezpublish.siteaccessaware.repository"
             $richTextConverter: '@ezpublish.fieldType.ezrichtext.converter.input.xhtml5'
 
+    BD\EzPlatformGraphQLBundle\GraphQL\Mutation\UploadFiles:
+        arguments:
+            $repository: '@ezpublish.siteaccessaware.repository'
+        tags:
+            - { name: overblog_graphql.mutation, alias: "UploadFiles", method: "uploadFiles" }
+
     BD\EzPlatformGraphQLBundle\GraphQL\Resolver\UserResolver:
         tags:
             - { name: overblog_graphql.resolver, alias: "User", method: "resolveUser" }
