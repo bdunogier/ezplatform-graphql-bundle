@@ -3,12 +3,22 @@
 The domain content is the main GraphQL schema of eZ Platform. It is created
 based on the content model: your types and theirs fields.
 
-Its usage requires that the GraphQL model is generated for a given repository, as a set of configuration files in the project's app.
+Its usage requires that the GraphQL model is generated for a given repository,
+as a set of configuration files in the project's AppBundle.
 
-The generated schema will list:
-- the content types groups
-- for each group the content types it contains
-- for each content type, its fields definitions, mapped to their Field Value Type
+The generated schema exposes:
+- content types groups, with their camel cased identifier: `content`, `media`...
+    - a `_types` field
+        - each content type is exposed using its camel cased identifier: `blogPost`, `landingPage`
+            - below each content type, one field per field definition of the type, using its
+              camel cased identifier: `title`, `relatedContent`.
+                - for each field definition, its properties:
+                    - common ones: `name`, `descriptions`, `isRequired`...
+                    - type specific ones: `constraints.minLength`, `settings.selectionLimit`...
+    - the content types from the group, as two fields:
+        a) plural (`articles`, `blogPosts`)
+        b) singular (`article`, `blogPost`)
+        - for each content type, one field per field definition, returning the field's value
 
 Queries look like this:
 
@@ -23,12 +33,43 @@ Queries look like this:
         variations(alias: large) { uri }
       }
     }
-    folders {
+    folder(id: 1234) {
       name
     }
   }
 }
 ```
+
+## Mutations
+For each content type, two mutations will be exposed: `create{ContentType}` and `update{ContentType}`:
+`createArticle`, `updateBlogPost`, ... they can be used to respectively create and update content items
+of each type. In addition, an input type is created for each of those mutations: `{ContentType}ContentCreateInput`,
+`{Article}ContentUpdateInput`, used to provide input data to the mutations.
+
+### Authentication
+The current user needs to be authorized to perform the operation. You can log in using `/login` to get a session cookie,
+and add that session cookie to the request. With GraphiQL, logging in on another tab will work.
+
+### Example
+
+```
+mutation CreateBlogPost {
+  createBlogPost(
+    parentLocationId: 2,
+    input: {
+      title: "The blog post's title",
+      author: [
+        {name: "John Doe", email: "johndoe@unknown.net"}
+      ],
+      body: "<?xml version=\"1.0\"?>\n<section xmlns=\"http://docbook.org/ns/docbook\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:ezxhtml=\"http://ez.no/xmlns/ezpublish/docbook/xhtml\" xmlns:ezcustom=\"http://ez.no/xmlns/ezpublish/docbook/custom\" version=\"5.0-variant ezpublish-1.0\">\n<para>A paragraph\n</para>\n</section>"
+    }
+  ) {
+    _info { id mainLocationId }
+    title
+  }
+}
+```
+
 
 ## Setting it up
 
@@ -67,8 +108,7 @@ A worker implements the `DomainSchema\SchemaWorker\SchemaWorker` interface. They
 
 Both method receive as arguments a reference to the schema array, and an array of arguments.
 
-A custom worker must be passed to the `BD\EzPlatformGraphQLBundle\DomainContent\RepositoryDomainGenerator` service
-by means of a compiler pass that adds a call to `addWorker()`.
+Custom workers must be tagged with `ezplatform_graphql.schema_worker`.
 
 ### Data available to workers
 
