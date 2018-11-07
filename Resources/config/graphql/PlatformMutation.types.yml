@@ -63,6 +63,13 @@ RichTextFieldInput:
     config:
         fields:
             format:
-                type: String
+                type: RichTextFieldInputFormat
             input:
                 type: String
+
+RichTextFieldInputFormat:
+    type: enum
+    config:
+        values:
+            markdown: {}
+            html: {}
