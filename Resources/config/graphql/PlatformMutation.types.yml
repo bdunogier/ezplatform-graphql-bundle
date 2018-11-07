@@ -20,7 +20,7 @@ PlatformMutation:
                         type: Int!
                         description: "The location ID of a container to upload the files to"
                     files:
-                        type: "[ImageUpload]!"
+                        type: "[FileUpload]!"
 
 UploadedFilesPayload:
     type: object
@@ -51,9 +51,9 @@ ImageFieldInput:
             alternativeText:
                 type: String
             file:
-                type: ImageUpload
+                type: FileUpload
 
-ImageUpload:
+FileUpload:
     type: custom-scalar
     config:
         scalarType: '@=newObject("Overblog\\GraphQLBundle\\Upload\\Type\\GraphQLUploadType")'
