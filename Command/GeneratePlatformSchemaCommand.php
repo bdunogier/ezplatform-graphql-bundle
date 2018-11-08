@@ -7,6 +7,7 @@ namespace BD\EzPlatformGraphQLBundle\Command;
 
 use BD\EzPlatformGraphQLBundle\Schema\SchemaGenerator;
 use eZ\Publish\API\Repository\Repository;
+use Overblog\GraphQLBundle\Generator\TypeGenerator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -28,11 +29,17 @@ class GeneratePlatformSchemaCommand extends Command
 
     const TYPES_DIRECTORY = "app/config/graphql";
 
-    public function __construct(Repository $repository, SchemaGenerator $generator)
+    /**
+     * @var TypeGenerator
+     */
+    private $typeGenerator;
+
+    public function __construct(Repository $repository, SchemaGenerator $generator, TypeGenerator $typeGenerator)
     {
         parent::__construct();
         $this->repository = $repository;
         $this->generator = $generator;
+        $this->typeGenerator = $typeGenerator;
     }
 
     protected function configure()
@@ -65,6 +72,11 @@ class GeneratePlatformSchemaCommand extends Command
             } else {
                 $output->writeln("\n# $type\n$yaml\n");
             }
+        }
+
+        if ($doWrite) {
+            $output->writeln("Updating graphql types...");
+            $this->typeGenerator->compile(TypeGenerator::MODE_WRITE | TypeGenerator::MODE_OVERRIDE);
         }
     }
 }

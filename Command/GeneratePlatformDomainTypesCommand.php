@@ -3,6 +3,7 @@ namespace BD\EzPlatformGraphQLBundle\Command;
 
 use BD\EzPlatformGraphQLBundle\Schema\SchemaGenerator;
 use eZ\Publish\API\Repository\Repository;
+use Overblog\GraphQLBundle\Generator\TypeGenerator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -11,9 +12,9 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class GeneratePlatformDomainTypesCommand extends GeneratePlatformSchemaCommand
 {
-    public function __construct(Repository $repository, SchemaGenerator $generator)
+    public function __construct(Repository $repository, SchemaGenerator $generator, TypeGenerator $typeGenerator)
     {
-        parent::__construct($repository, $generator);
+        parent::__construct($repository, $generator, $typeGenerator);
     }
 
     protected function configure()

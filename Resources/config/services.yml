@@ -1,7 +1,6 @@
 services:
     BD\EzPlatformGraphQLBundle\Command\GeneratePlatformDomainTypesCommand:
-        autoconfigure: true
-        autowire: true
+        parent: BD\EzPlatformGraphQLBundle\Command\GeneratePlatformSchemaCommand
         tags:
             -  { name: console.command }
 
@@ -10,6 +9,8 @@ services:
         autowire: true
         tags:
             -  { name: console.command }
+        arguments:
+            $typeGenerator: '@overblog_graphql.cache_compiler'
 
     BD\EzPlatformGraphQLBundle\GraphQL\TypeDefinition\ContentTypeMapper: ~
 
