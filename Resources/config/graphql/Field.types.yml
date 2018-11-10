@@ -390,6 +390,11 @@ RichTextFieldValue:
                 type: "String"
                 description: "Editable HTML5 representation."
                 resolve: "@=resolver('RichTextXmlToHtml5Edit', [value.xml])"
+                deprecationReason: "Use 'rendered' with the html5_edit format argument"
+            embeds:
+                type: "[DomainContent]"
+                description: "Content items embedded in this field"
+                resolve: "@=resolver('RichTextEmbeds', [value.value])"
     inherits: [HTMLFieldValue]
 
 SelectionFieldValue:

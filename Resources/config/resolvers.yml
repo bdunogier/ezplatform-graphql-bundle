@@ -100,9 +100,12 @@ services:
         arguments:
             - "@ezpublish.fieldType.ezrichtext.converter.output.xhtml5"
             - "@ezpublish.fieldType.ezrichtext.converter.edit.xhtml5"
+            - '@ezpublish.siteaccessaware.service.content'
+            - '@ezpublish.fieldType.ezrichtext'
         tags:
             - { name: overblog_graphql.resolver, alias: "RichTextXmlToHtml5", method: "xmlToHtml5" }
             - { name: overblog_graphql.resolver, alias: "RichTextXmlToHtml5Edit", method: "xmlToHtml5Edit" }
+            - { name: overblog_graphql.resolver, alias: "RichTextEmbeds", method: "resolveEmbeds" }
 
     BD\EzPlatformGraphQLBundle\GraphQL\Resolver\ImageFieldResolver:
         arguments:
