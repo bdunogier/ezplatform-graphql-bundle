@@ -22,3 +22,6 @@ services:
             - { name: "overblog_graphql.mutation", alias: "DeleteSection", method: "deleteSection" }
 
     BD\EzPlatformGraphQLBundle\GraphQL\InputMapper\SearchQueryMapper: ~
+
+    BD\EzPlatformGraphQLBundle\GraphQL\ExpressionLanguage\HasAdminAccessFunction:
+        tags: ['overblog_graphql.expression_function']

@@ -6,3 +6,5 @@ Platform:
                 type: Repository
                 resolve: { }
                 description: "eZ Platform repository API"
+                public: '@=hasAdminAccess()'
+                public: '@=hasAdminAccess()'
