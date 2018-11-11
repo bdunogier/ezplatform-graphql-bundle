@@ -23,5 +23,8 @@ services:
 
     BD\EzPlatformGraphQLBundle\GraphQL\InputMapper\SearchQueryMapper: ~
 
-    BD\EzPlatformGraphQLBundle\GraphQL\ExpressionLanguage\HasAdminAccessFunction:
+    BD\EzPlatformGraphQLBundle\GraphQL\ExpressionLanguage\Access\HasAdminAccessFunction:
+        tags: ['overblog_graphql.expression_function']
+
+    BD\EzPlatformGraphQLBundle\GraphQL\ExpressionLanguage\Access\HasEzAccessToOneOfFunction:
         tags: ['overblog_graphql.expression_function']

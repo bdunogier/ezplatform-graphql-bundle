@@ -1,21 +1,11 @@
 <?php
-namespace BD\EzPlatformGraphQLBundle\GraphQL\ExpressionLanguage;
+namespace BD\EzPlatformGraphQLBundle\GraphQL\ExpressionLanguage\Access;
 
 use Overblog\GraphQLBundle\ExpressionLanguage\ExpressionFunction;
 
-class HasAdminAccessFunction extends ExpressionFunction
+abstract class BaseAccessFunction extends ExpressionFunction
 {
-    public function __construct()
-    {
-        parent::__construct(
-            'hasAdminAccess',
-            function () {
-                return $this->buildHasAccessCode(["section/view", "class/create", "role/read"]);
-            }
-        );
-    }
-
-    private function buildHasAccessCode(array $policies)
+    protected function buildHasAccessCode(array $policies)
     {
         $checks = array_map(
             function($policy) {
@@ -34,4 +24,5 @@ class HasAdminAccessFunction extends ExpressionFunction
   return %s;
 })()', implode('||', $checks));
     }
+
 }
