@@ -22,3 +22,9 @@ services:
             - { name: "overblog_graphql.mutation", alias: "DeleteSection", method: "deleteSection" }
 
     BD\EzPlatformGraphQLBundle\GraphQL\InputMapper\SearchQueryMapper: ~
+
+    BD\EzPlatformGraphQLBundle\Security\ApiKeyUserProvider:
+        autowire: true
+
+    BD\EzPlatformGraphQLBundle\Security\ApiKeyAuthenticator:
+        autowire: true
