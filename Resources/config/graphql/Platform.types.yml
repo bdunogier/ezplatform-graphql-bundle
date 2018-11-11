@@ -7,3 +7,6 @@ Platform:
                 resolve: { }
                 description: "eZ Platform repository API"
                 public: "@=hasEzAccessToOneOf('section/view', 'class/create', 'role/read')"
+            viewer:
+                type: User
+                resolve: "@=resolver('Viewer')"

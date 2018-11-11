@@ -61,6 +61,10 @@ services:
             - { name: overblog_graphql.resolver, alias: "UserGroupSubGroups", method: "resolveUserGroupSubGroups" }
             - { name: overblog_graphql.resolver, alias: "UsersOfGroup", method: "resolveUsersOfGroup" }
 
+    BD\EzPlatformGraphQLBundle\GraphQL\Resolver\ViewerResolver:
+        tags:
+            - { name: overblog_graphql.resolver, alias: "Viewer", method: "resolveViewer" }
+
     BD\EzPlatformGraphQLBundle\GraphQL\Resolver\ContentTypeResolver:
         tags:
             - { name: overblog_graphql.resolver, alias: "ContentTypeById", method: "resolveContentTypeById" }
