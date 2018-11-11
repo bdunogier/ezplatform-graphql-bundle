@@ -32,3 +32,9 @@ services:
     ezplatform_graphql.can_user:
         autowire: true
         class: 'BD\EzPlatformGraphQLBundle\Security\CanUser'
+
+    BD\EzPlatformGraphQLBundle\Security\ApiKeyUserProvider:
+        autowire: true
+
+    BD\EzPlatformGraphQLBundle\Security\ApiKeyAuthenticator:
+        autowire: true
