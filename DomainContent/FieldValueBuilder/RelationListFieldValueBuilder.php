@@ -47,7 +47,19 @@ class RelationListFieldValueBuilder implements FieldValueBuilder
             $isMultiple
         );
 
-        return ['type' => $type, 'resolve' => $resolver];
+        $field = [
+            'type' => $type,
+            'resolve' => $resolver
+        ];
+
+        if (isset($contentType)) {
+            $field['public'] = sprintf(
+                '@=service("ezplatform_graphql.can_user").viewContentOfType("%s")',
+                $contentType->identifier
+            );
+        }
+
+        return $field;
     }
 
     private function mapFieldTypeIdentifierToGraphQLType($fieldTypeIdentifier)
