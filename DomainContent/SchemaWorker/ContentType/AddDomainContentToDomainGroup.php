@@ -28,6 +28,7 @@ class AddDomainContentToDomainGroup extends BaseWorker implements SchemaWorker
                 'type' => sprintf("[%s]", $this->getContentName($contentType)),
                 // @todo Improve description to mention that it is a collection ?
                 'description' => isset($descriptions['eng-GB']) ? $descriptions['eng-GB'] : 'No description available',
+                'public' => $this->getPublicValue($contentType),
                 'resolve' => sprintf(
                     '@=resolver("DomainContentItemsByTypeIdentifier", ["%s", args])',
                     $contentType->identifier
@@ -47,6 +48,7 @@ class AddDomainContentToDomainGroup extends BaseWorker implements SchemaWorker
                 'type' => $this->getContentName($contentType),
                 'description' => isset($descriptions['eng-GB']) ? $descriptions['eng-GB'] : 'No description available',
                 'resolve' => sprintf('@=resolver("DomainContentItem", [args, "%s"])', $contentType->identifier),
+                'public' => $this->getPublicValue($contentType),
                 'args' => [
                     // @todo How do we constraint this so that it only takes an id of an item of that type ?
                     // same approach than GlobalId ? (<type>-<id>)
@@ -138,6 +140,18 @@ class AddDomainContentToDomainGroup extends BaseWorker implements SchemaWorker
             [$this->getGroupName($contentTypeGroup)]
             ['config']['fields']
             [$this->getContentCollectionField($contentType)]
+        );
+    }
+
+    /**
+     * @param $contentType
+     * @return string
+     */
+    protected function getPublicValue($contentType): string
+    {
+        return sprintf(
+            '@=service("ezplatform_graphql.can_user").viewContentOfType("%s")',
+            $contentType->identifier
         );
     }
 }
