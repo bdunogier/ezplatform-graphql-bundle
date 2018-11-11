@@ -28,3 +28,7 @@ services:
 
     BD\EzPlatformGraphQLBundle\GraphQL\ExpressionLanguage\Access\HasEzAccessToOneOfFunction:
         tags: ['overblog_graphql.expression_function']
+
+    ezplatform_graphql.can_user:
+        autowire: true
+        class: 'BD\EzPlatformGraphQLBundle\Security\CanUser'

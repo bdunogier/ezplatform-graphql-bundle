@@ -1,0 +1,5 @@
+graphql:
+    content_type_view:
+        - Class
+    content:
+        - Class
