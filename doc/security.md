@@ -1,7 +1,16 @@
 The GraphQL server comes with an api key based auth mechanism. It uses data from the repository, linked to the user.
 
-## Firewall setup
-Add a rule for the graphql routes:
+## Configuration
+Define the Api Key user provider in `app/config/security.yml`:
+```
+security:
+    providers:
+        api_key_user_provider:
+            id: BD\EzPlatformGraphQLBundle\Security\ApiKeyUserProvider
+
+```
+
+and a rule for the graphql routes:
 
 ```yaml
 security:
