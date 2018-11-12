@@ -36,33 +36,27 @@ class DomainContentResolver
     private $queryMapper;
 
     /**
-     * @var LocationService
+     * @var Repository
      */
-    private $locationService;
+    private $repository;
 
     public function __construct(
-        ContentService $contentService,
-        SearchService $searchService,
-        ContentTypeService $contentTypeService,
-        LocationService $locationService,
+        Repository $repository,
         TypeResolver $typeResolver,
         SearchQueryMapper $queryMapper)
     {
-        $this->contentService = $contentService;
-        $this->searchService = $searchService;
-        $this->contentTypeService = $contentTypeService;
         $this->typeResolver = $typeResolver;
         $this->queryMapper = $queryMapper;
-        $this->locationService = $locationService;
+        $this->repository = $repository;
     }
 
-    public function resolveDomainContentItems($contentTypeIdentifier, $query = null)
+    public function resolveDomainContentItems($contentTypeIdentifier, $args = null)
     {
         return array_map(
             function (Content $content) {
                 return $content->contentInfo;
             },
-            $this->findContentItemsByTypeIdentifier($contentTypeIdentifier, $query)
+            $this->findContentItemsByTypeIdentifier($contentTypeIdentifier, $args)
         );
     }
 
@@ -99,8 +93,26 @@ class DomainContentResolver
      */
     private function findContentItemsByTypeIdentifier($contentTypeIdentifier, Argument $args): array
     {
-        $queryArg = $args['query'];
+        $contentType = $this->repository->getContentTypeService()->loadContentTypeByIdentifier($contentTypeIdentifier);
+        $fieldsArgument = [];
+        foreach ($args->getRawArguments() as $argument => $value) {
+            if (($fieldDefinition = $contentType->getFieldDefinition($argument)) === null) {
+                continue;
+            }
+
+            if (!$fieldDefinition->isSearchable) {
+                continue;
+            }
+
+            $fieldFilter = $this->buildFieldFilter($argument, $value);
+            if ($fieldFilter !== null) {
+                $fieldsArgument[] = $fieldFilter;
+            }
+        }
+
+        $queryArg = [];
         $queryArg['ContentTypeIdentifier'] = $contentTypeIdentifier;
+        $queryArg['Fields'] = $fieldsArgument;
         $args['query'] = $queryArg;
 
         $query = $this->queryMapper->mapInputToQuery($args['query']);
@@ -204,5 +216,46 @@ class DomainContentResolver
     private function getSearchService()
     {
         return $this->repository->getSearchService();
+    }
+
+    private function buildFieldFilter($fieldDefinitionIdentifier, $value)
+    {
+        if (count($value) === 1) {
+            $value = $value[0];
+        }
+        if (is_array($value)) {
+            $operator = 'in';
+            // @todo if 3 items, and first item is 'between', use next two items as value
+        } else if (is_string($value)) {
+            if ($value{0} === '~') {
+                $value = substr($value, 1);
+                $operator = 'like';
+                if (strpos($value, '%') === false) {
+                    $value = "%$value%";
+                }
+            } elseif ($value{0} === '<') {
+                $value = substr($value, 1);
+                if ($value{1} === '=') {
+                    $operator = 'lte';
+                    $value = substr($value, 2);
+                } else {
+                    $value = substr($value, 1);
+                    $operator = 'lt';
+                }
+            } elseif ($value{0} === '<') {
+                $value = substr($value, 1);
+                if ($value{1} === '=') {
+                    $operator = 'gte';
+                    $value = substr($value, 2);
+                } else {
+                    $operator = 'gt';
+                    $value = substr($value, 1);
+                }
+            } else {
+                $operator = 'eq';
+            }
+        }
+
+        return ['target' => $fieldDefinitionIdentifier, $operator => trim($value)];
     }
 }

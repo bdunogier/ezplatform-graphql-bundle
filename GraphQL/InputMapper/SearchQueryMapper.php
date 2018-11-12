@@ -9,6 +9,7 @@
 namespace BD\EzPlatformGraphQLBundle\GraphQL\InputMapper;
 
 use eZ\Publish\API\Repository\Values\Content\Query;
+use GraphQL\Error\UserError;
 use InvalidArgumentException;
 
 class SearchQueryMapper
@@ -31,21 +32,29 @@ class SearchQueryMapper
             }
         }
 
-        if (isset($inputArray['Field']))
-        {
-            $args = $inputArray['Field'];
-            foreach (['in', 'eq', 'like', 'contains', 'between', 'lt', 'lte', 'gt', 'gte'] as $opString) {
-                if (isset($args[$opString])) {
-                    $value = $args[$opString];
-                    $operator = constant('eZ\Publish\API\Repository\Values\Content\Query\Criterion\Operator::' . strtoupper($opString));
+        if (isset($inputArray['Field'])) {
+            $inputArray['Fields'] = [$inputArray['Field']];
+        }
+
+        if (isset($inputArray['Fields'])) {
+            foreach ($inputArray['Fields'] as $fieldFilter) {
+                foreach (['in', 'eq', 'like', 'contains', 'between', 'lt', 'lte', 'gt', 'gte'] as $opString) {
+                    if (!isset($fieldFilter['target'])) {
+                        throw new UserError("Field filters require a 'target' attribute");
+                    }
+
+                    if (isset($fieldFilter[$opString])) {
+                        $criteria[] = new Query\Criterion\Field(
+                            $fieldFilter['target'],
+                            constant(Query\Criterion\Operator::class . '::' . strtoupper($opString)),
+                            $fieldFilter[$opString]
+                        );
+                        continue 2;
+                    }
                 }
-            }
 
-            if (!isset($operator)) {
-                throw new InvalidArgumentException("Unspecified operator");
+                throw new UserError("Invalid filter, missing operator");
             }
-
-            $criteria[] = new Query\Criterion\Field($args['target'], $operator, $value);
         }
 
         $criteria = array_merge($criteria, $this->mapDateMetadata($inputArray, 'Modified'));
