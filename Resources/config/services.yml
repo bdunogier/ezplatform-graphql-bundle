@@ -22,3 +22,19 @@ services:
             - { name: "overblog_graphql.mutation", alias: "DeleteSection", method: "deleteSection" }
 
     BD\EzPlatformGraphQLBundle\GraphQL\InputMapper\SearchQueryMapper: ~
+
+    BD\EzPlatformGraphQLBundle\DependencyInjection\Factory\SearchFeaturesFactory:
+        arguments:
+            $configurationProvider: '@ezpublish.api.repository_configuration_provider'
+            $searchFeatures:
+                solr: '@BD\EzPlatformGraphQLBundle\Search\SolrSearchFeatures'
+                legacy: '@BD\EzPlatformGraphQLBundle\Search\LegacySearchFeatures'
+
+    BD\EzPlatformGraphQLBundle\Search\SearchFeatures:
+        factory: ['@BD\EzPlatformGraphQLBundle\DependencyInjection\Factory\SearchFeaturesFactory', build]
+
+    BD\EzPlatformGraphQLBundle\Search\LegacySearchFeatures:
+        arguments:
+            $converterRegistry: '@ezpublish.persistence.legacy.field_value_converter.registry'
+
+    BD\EzPlatformGraphQLBundle\Search\SolrSearchFeatures: ~
