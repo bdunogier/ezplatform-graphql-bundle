@@ -83,7 +83,7 @@ class AddDomainContentToDomainGroup extends BaseWorker implements SchemaWorker
             && $args['ContentType'] instanceof ContentType
             && isset($args['ContentTypeGroup'])
             && $args['ContentTypeGroup'] instanceof ContentTypeGroup
-            && !$this->isFieldDefined($args['ContentTypeGroup'], $args['ContentType']);
+            && !$this->isFieldDefined($schema, $args['ContentTypeGroup'], $args['ContentType']);
     }
 
     /**
@@ -131,7 +131,7 @@ class AddDomainContentToDomainGroup extends BaseWorker implements SchemaWorker
         return $this->getNameHelper()->domainContentName($contentType);
     }
 
-    private function isFieldDefined(ContentTypeGroup $contentTypeGroup, ContentType $contentType)
+    private function isFieldDefined($schema, ContentTypeGroup $contentTypeGroup, ContentType $contentType)
     {
         return isset(
             $schema
