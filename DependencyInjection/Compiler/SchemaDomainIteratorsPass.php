@@ -6,7 +6,7 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 
-class SchemaWorkersPass implements CompilerPassInterface
+class SchemaDomainIteratorsPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
@@ -16,12 +16,12 @@ class SchemaWorkersPass implements CompilerPassInterface
 
         $generatorDefinition = $container->getDefinition(Generator::class);
         
-        $workers = [];
-        foreach ($container->findTaggedServiceIds('ezplatform_graphql.domain_schema_worker') as $id => $tags) {
-            $workers[] = new Reference($id);
+        $iterators = [];
+        foreach ($container->findTaggedServiceIds('ezplatform_graphql.schema_domain_iterator') as $id => $tags) {
+            $iterators[] = new Reference($id);
         }
 
-        $generatorDefinition->setArgument('$workers', $workers);
+        $generatorDefinition->setArgument('$iterators', $iterators);
         $container->setDefinition(Generator::class, $generatorDefinition);
     }
 }
