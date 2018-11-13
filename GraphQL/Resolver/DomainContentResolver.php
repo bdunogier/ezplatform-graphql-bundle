@@ -223,13 +223,11 @@ class DomainContentResolver
         if (is_array($value) && count($value) === 1) {
             $value = $value[0];
         }
-        $operator = $operator = Query\Criterion\Operator::EQ;
-        ;
+        $operator = 'eq';
 
+        // @todo if 3 items, and first item is 'between', use next two items as value
         if (is_array($value)) {
             $operator = 'in';
-
-            // @todo if 3 items, and first item is 'between', use next two items as value
         } else if (is_string($value)) {
             if ($value[0] === '~') {
                 $operator = 'like';
