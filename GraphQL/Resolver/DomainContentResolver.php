@@ -223,30 +223,32 @@ class DomainContentResolver
         if (is_array($value) && count($value) === 1) {
             $value = $value[0];
         }
-        $operator = 'eq';
+        $operator = $operator = Query\Criterion\Operator::EQ;
+        ;
 
         if (is_array($value)) {
             $operator = 'in';
+
             // @todo if 3 items, and first item is 'between', use next two items as value
         } else if (is_string($value)) {
             if ($value[0] === '~') {
-                $value = substr($value, 1);
                 $operator = 'like';
+                $value = substr($value, 1);
                 if (strpos($value, '%') === false) {
                     $value = "%$value%";
                 }
             } elseif ($value[0] === '<') {
                 $value = substr($value, 1);
-                if ($value{1} === '=') {
+                if ($value[0] === '=') {
                     $operator = 'lte';
                     $value = substr($value, 2);
                 } else {
-                    $value = substr($value, 1);
                     $operator = 'lt';
+                    $value = substr($value, 1);
                 }
             } elseif ($value[0] === '<') {
                 $value = substr($value, 1);
-                if ($value[1] === '=') {
+                if ($value[0] === '=') {
                     $operator = 'gte';
                     $value = substr($value, 2);
                 } else {
