@@ -220,20 +220,22 @@ class DomainContentResolver
 
     private function buildFieldFilter($fieldDefinitionIdentifier, $value)
     {
-        if (count($value) === 1) {
+        if (is_array($value) && count($value) === 1) {
             $value = $value[0];
         }
+        $operator = 'eq';
+
         if (is_array($value)) {
             $operator = 'in';
             // @todo if 3 items, and first item is 'between', use next two items as value
         } else if (is_string($value)) {
-            if ($value{0} === '~') {
+            if ($value[0] === '~') {
                 $value = substr($value, 1);
                 $operator = 'like';
                 if (strpos($value, '%') === false) {
                     $value = "%$value%";
                 }
-            } elseif ($value{0} === '<') {
+            } elseif ($value[0] === '<') {
                 $value = substr($value, 1);
                 if ($value{1} === '=') {
                     $operator = 'lte';
@@ -242,17 +244,15 @@ class DomainContentResolver
                     $value = substr($value, 1);
                     $operator = 'lt';
                 }
-            } elseif ($value{0} === '<') {
+            } elseif ($value[0] === '<') {
                 $value = substr($value, 1);
-                if ($value{1} === '=') {
+                if ($value[1] === '=') {
                     $operator = 'gte';
                     $value = substr($value, 2);
                 } else {
                     $operator = 'gt';
                     $value = substr($value, 1);
                 }
-            } else {
-                $operator = 'eq';
             }
         }
 
