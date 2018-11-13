@@ -43,7 +43,7 @@ class AddFieldDefinitionToCollectionFilters extends BaseWorker implements Schema
             ['args'][$fieldDefinitionField] = $filter;
     }
 
-    public function canWork(array &$schema, array $args)
+    public function canWork(array $schema, array $args)
     {
         return
             isset($args['FieldDefinition'])
