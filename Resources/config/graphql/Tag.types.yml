@@ -1,0 +1,30 @@
+Tag:
+    type: object
+    config:
+        fields:
+            id:
+                type: Int
+            parentTagId:
+                type: Int
+            mainTagId:
+                type: Int
+            keyword:
+                type: String
+            keywords:
+                type: "[String]"
+            depth:
+                type: Int
+            pathString:
+                type: String
+            path:
+                type: "[Int]"
+            modificationDate:
+                type: "DateTime"
+            remoteId:
+                type: "String"
+            alwaysAvailable:
+                type: "Boolean"
+            mainLanguageCode:
+                type: "String"
+            languageCodes:
+                type: "[String]"

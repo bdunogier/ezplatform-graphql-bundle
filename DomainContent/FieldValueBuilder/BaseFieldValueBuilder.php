@@ -26,6 +26,7 @@ class BaseFieldValueBuilder implements FieldValueBuilder
         'ezobjectrelationlist' => 'RelationListFieldValue',
         'ezrichtext' => 'RichTextFieldValue',
         'ezstring' => 'String',
+        'eztags' => ['[Tag]', '@=resolver("DomainFieldValue", [value, "%s"]).value.tags'],
         'eztext' => 'String',
     ];
 
