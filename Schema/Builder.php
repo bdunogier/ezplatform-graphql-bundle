@@ -19,17 +19,17 @@ interface Builder
     /**
      * @param string $type
      * @param string $field
-     * @param Input\Arg $arg
+     * @param Input\Arg $argInput
      * @return void
      */
-    public function addArgToField($type, $field, Input\Arg $arg);
+    public function addArgToField($type, $field, Input\Arg $argInput);
 
     /**
      * @param string $enum
-     * @param Input\EnumValue $arg
+     * @param Input\EnumValue $value
      * @return void
      */
-    public function addValueToEnum($enum, Input\EnumValue $arg);
+    public function addValueToEnum($enum, Input\EnumValue $value);
 
     /**
      * @param string $type
