@@ -1,0 +1,29 @@
+language: php
+
+php:
+  - 7.1
+
+# test only master (+ Pull requests)
+branches:
+  only:
+    - master
+
+env:
+  matrix:
+    - TARGET="phpspec"
+
+# setup requirements for running unit tests
+before_script:
+  - COMPOSER_MEMORY_LIMIT=-1 composer install
+
+# execute phpunit as the script command
+script:
+  - if [ "$TARGET" == "phpspec" ] ; then ./vendor/bin/phpspec run --format=pretty; fi
+
+branches:
+  only:
+    - testing
+
+# disable mail notifications
+notification:
+  email: false
