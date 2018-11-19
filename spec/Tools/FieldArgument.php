@@ -1,14 +1,7 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: bdunogier
- * Date: 17/11/2018
- * Time: 15:45
- */
+namespace spec\BD\EzPlatformGraphQL\Tools;
 
-namespace BD\EzPlatformGraphQLBundle\spec\Tools;
-
-use BD\EzPlatformGraphQLBundle\Schema\Builder\Input;
+use BD\EzPlatformGraphQL\Schema\Builder\Input;
 use Prophecy\Argument\Token\CallbackToken;
 
 class FieldArgument

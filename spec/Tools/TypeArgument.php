@@ -1,7 +1,7 @@
 <?php
-namespace BD\EzPlatformGraphQLBundle\spec\Tools;
+namespace spec\BD\EzPlatformGraphQL\Tools;
 
-use BD\EzPlatformGraphQLBundle\Schema\Builder\Input;
+use BD\EzPlatformGraphQL\Schema\Builder\Input;
 use Prophecy\Argument\Token\CallbackToken;
 
 class TypeArgument

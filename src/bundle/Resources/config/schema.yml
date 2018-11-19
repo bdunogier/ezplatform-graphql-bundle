@@ -1,0 +1,33 @@
+services:
+    _defaults:
+        autoconfigure: true
+        autowire: true
+        public: false
+
+    BD\EzPlatformGraphQL\Schema\:
+        resource: '../../Schema'
+
+    _instanceof:
+        BD\EzPlatformGraphQL\Schema\Domain\Content\BaseWorker:
+            calls:
+                - [setNameHelper, ['@BD\EzPlatformGraphQL\Schema\Domain\Content\NameHelper']]
+
+        BD\EzPlatformGraphQL\Schema\Domain\Content\SchemaWorker:
+            tags:
+                - {name: 'ezplatform_graphql.schema_worker'}
+
+        BD\EzPlatformGraphQL\Schema\Domain\Iterator:
+            tags:
+                - {name: 'ezplatform_graphql.schema_domain_iterator'}
+
+    BD\EzPlatformGraphQL\Schema\Domain\Content\FieldDefinition\AddFieldDefinitionToDomainContent:
+        arguments:
+            $defaultFieldValueBuilder: '@BD\EzPlatformGraphQL\Schema\Domain\Content\FieldValueBuilder\BaseFieldValueBuilder'
+
+    BD\EzPlatformGraphQL\Schema±Domain\Content\FieldValueBuilder\RelationListFieldValueBuilder:
+        tags:
+            - {name: ezplatform_graphql.field_value_builder, type: 'ezobjectrelationlist'}
+
+    BD\EzPlatformGraphQL\Schema\Domain\Content\FieldValueBuilder\SelectionFieldValueBuilder:
+        tags:
+            - {name: ezplatform_graphql.field_value_builder, type: 'ezselection'}

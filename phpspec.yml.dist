@@ -1,0 +1,5 @@
+suites:
+  lib:
+    namespace: BD\EzPlatformGraphQL
+    psr4_prefix: BD\EzPlatformGraphQL
+    src_path: src/lib/

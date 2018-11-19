@@ -1,5 +1,5 @@
 <?php
-namespace spec\Tools;
+namespace spec\BD\EzPlatformGraphQL\Tools;
 
 use PhpSpec\Wrapper\ObjectWrapper;
 use Prophecy\Argument;

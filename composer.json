@@ -19,12 +19,13 @@
     },
     "autoload": {
         "psr-4": {
-            "BD\\EzPlatformGraphQLBundle\\": ""
+            "BD\\EzPlatformGraphQL\\": "src/lib",
+            "BD\\EzPlatformGraphQLBundle\\": "src/bundle"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "spec\\Tools\\": "spec/Tools"
+            "spec\\BD\\EzPlatformGraphQL\\": "spec"
         }
     },
     "extra": {

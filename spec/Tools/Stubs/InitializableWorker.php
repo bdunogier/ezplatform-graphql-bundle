@@ -1,7 +1,7 @@
 <?php
-namespace BD\EzPlatformGraphQLBundle\spec\Tools\Stubs;
+namespace spec\BD\EzPlatformGraphQL\Tools\Stubs;
 
-use BD\EzPlatformGraphQLBundle\Schema;;
+use BD\EzPlatformGraphQL\Schema;
 
 interface InitializableWorker extends Schema\Worker, Schema\Initializer
 {
