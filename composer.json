@@ -22,6 +22,12 @@
             "BD\\EzPlatformGraphQLBundle\\": ""
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "spec\\Tools\\": "spec/Tools",
+            "spec\\BD\\EzPlatformGraphQLBundle\\": "spec/BD/EzPlatformGraphQLBundle"
+        }
+    },
     "extra": {
         "branch-alias": {
             "dev-master": "0.4.x-dev"

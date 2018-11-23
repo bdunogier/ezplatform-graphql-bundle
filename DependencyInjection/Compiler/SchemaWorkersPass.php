@@ -1,21 +1,20 @@
 <?php
 namespace BD\EzPlatformGraphQLBundle\DependencyInjection\Compiler;
 
+use BD\EzPlatformGraphQLBundle\Schema\Generator;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 
 class SchemaWorkersPass implements CompilerPassInterface
 {
-    const ID = 'BD\EzPlatformGraphQLBundle\DomainContent\DomainContentSchemaBuilder';
-
     public function process(ContainerBuilder $container)
     {
-        if (!$container->has(self::ID)) {
+        if (!$container->has(Generator::class)) {
             return;
         }
 
-        $generatorDefinition = $container->getDefinition(self::ID);
+        $generatorDefinition = $container->getDefinition(Generator::class);
         
         $workers = [];
         foreach ($container->findTaggedServiceIds('ezplatform_graphql.domain_schema_worker') as $id => $tags) {
@@ -23,6 +22,6 @@ class SchemaWorkersPass implements CompilerPassInterface
         }
 
         $generatorDefinition->setArgument('$workers', $workers);
-        $container->setDefinition(self::ID, $generatorDefinition);
+        $container->setDefinition(Generator::class, $generatorDefinition);
     }
 }

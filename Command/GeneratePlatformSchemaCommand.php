@@ -5,7 +5,7 @@
  */
 namespace BD\EzPlatformGraphQLBundle\Command;
 
-use BD\EzPlatformGraphQLBundle\Schema\SchemaGenerator;
+use BD\EzPlatformGraphQLBundle\Schema\Generator;
 use eZ\Publish\API\Repository\Repository;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,13 +23,13 @@ class GeneratePlatformSchemaCommand extends Command
     private $repository;
 
     /**
-     * @var \BD\EzPlatformGraphQLBundle\Schema\SchemaGenerator
+     * @var \BD\EzPlatformGraphQLBundle\Schema\Generator
      */
     private $generator;
 
     const TYPES_DIRECTORY = 'app/config/graphql/ezplatform';
 
-    public function __construct(Repository $repository, SchemaGenerator $generator)
+    public function __construct(Repository $repository, Generator $generator)
     {
         parent::__construct();
         $this->repository = $repository;
