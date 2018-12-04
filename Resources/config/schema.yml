@@ -22,7 +22,11 @@ services:
 
     BD\EzPlatformGraphQLBundle\Schema\Domain\Content\Worker\FieldDefinition\AddFieldValueToDomainContent:
         arguments:
-            $defaultFieldValueBuilder: '@BD\EzPlatformGraphQLBundle\Schema\Domain\Content\FieldValueBuilder\BaseFieldValueBuilder'
+            $defaultFieldValueBuilder: '@BD\EzPlatformGraphQLBundle\Schema\Domain\Content\FieldValueBuilder\ConfigurableFieldValueBuilder'
+
+    BD\EzPlatformGraphQLBundle\Schema\Domain\Content\FieldValueBuilder\ConfigurableFieldValueBuilder:
+        arguments:
+            $typesMap: "%ezplatform_graphql.configurable_field_value_builders%"
 
     BD\EzPlatformGraphQLBundle\Schema\Domain\Content\FieldValueBuilder\RelationListFieldValueBuilder:
         tags:

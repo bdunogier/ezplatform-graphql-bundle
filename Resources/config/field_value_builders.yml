@@ -1,0 +1,21 @@
+parameters:
+    ezplatform_graphql.configurable_field_value_builders:
+        ezauthor: { type: AuthorFieldValue, property: authors }
+        ezbinaryfile: BinaryFileFieldValue
+        ezboolean: { type: Boolean, property: bool }
+        ezcountry: String
+        ezdate: DateTime
+        ezdatetime: DateTime
+        ezemail: String
+        ezfloat: Float
+        ezgmaplocation: MapLocationFieldValue
+        ezimage: ImageFieldValue
+        ezimageasset: { type: ImageFieldValue, resolver: DomainImageAssetFieldValue }
+        ezinteger: Int
+        ezkeyword: { type: '[String]', property: 'values' }
+        ezmedia: MediaFieldValue
+        ezobjectrelation: RelationFieldValue
+        ezobjectrelationlist: RelationListFieldValue
+        ezrichtext: RichTextFieldValue
+        ezstring: String
+        eztext: String
