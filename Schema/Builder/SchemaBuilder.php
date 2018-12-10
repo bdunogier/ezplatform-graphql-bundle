@@ -47,7 +47,7 @@ class SchemaBuilder implements SchemaBuilderInterface
         if (!empty($fieldInput->description)) {
             $field['description'] = $fieldInput->description;
         }
-        if (!empty($fieldInput->resolve)) {
+        if (isset($fieldInput->resolve)) {
             $field['resolve'] = $fieldInput->resolve;
         }
 
