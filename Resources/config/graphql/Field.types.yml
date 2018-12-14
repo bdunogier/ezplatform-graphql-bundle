@@ -103,14 +103,14 @@ ImageFieldValue:
                     identifier:
                         type: "[ImageVariationIdentifier]!"
                         description: "One or more variation identifiers."
-                resolve: "@=resolver('ImageVariation', [value.value, args])"
+                resolve: "@=resolver('ImageVariation', [value, args])"
             variation:
                 type: ImageVariation
                 args:
                     identifier:
                         type: ImageVariationIdentifier!
                         description: "A variation identifier."
-                resolve: "@=resolver('ImageVariation', [value.value, args])"
+                resolve: "@=resolver('ImageVariation', [value, args])"
             html:
                 type: "String"
                 args:

@@ -1,6 +1,6 @@
 parameters:
     ezplatform_graphql.configurable_field_value_builders:
-        ezauthor: { type: AuthorFieldValue, property: authors }
+        ezauthor: { type: '[AuthorFieldValue]', property: authors }
         ezbinaryfile: BinaryFileFieldValue
         ezboolean: { type: Boolean, property: bool }
         ezcountry: String
@@ -9,7 +9,7 @@ parameters:
         ezemail: String
         ezfloat: Float
         ezgmaplocation: MapLocationFieldValue
-        ezimage: ImageFieldValue
+        ezimage: { type: ImageFieldValue, property: false }
         ezimageasset: { type: ImageFieldValue, resolver: DomainImageAssetFieldValue }
         ezinteger: Int
         ezkeyword: { type: '[String]', property: 'values' }

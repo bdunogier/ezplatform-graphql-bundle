@@ -9,7 +9,8 @@ use eZ\Publish\API\Repository\Values\ContentType\FieldDefinition;
  */
 class ConfigurableFieldValueBuilder implements FieldValueBuilder
 {
-    const RESOLVE_FIELD = '@=resolver("%resolver%", [value, "%field_def_identifier%"]).%property%';
+    const RESOLVE_FIELD = '@=resolver("%resolver%", [value, "%field_def_identifier%"])';
+    const RESOLVE_FIELD_WITH_PROPERTY = self::RESOLVE_FIELD . '.%property%';
     const DEFAULT_RESOLVER = 'DomainFieldValue';
     const DEFAULT_TYPE = 'String';
     const DEFAULT_PROPERTY = 'value';
@@ -24,20 +25,16 @@ class ConfigurableFieldValueBuilder implements FieldValueBuilder
             }
 
             if (!isset($config['resolve'])) {
-                $config['resolve'] = $resolveField = str_replace(
-                    [
-                        '%resolver%',
-                        '%property%'
-                    ],
-                    [
-                        $config['resolver'] ?? self::DEFAULT_RESOLVER,
-                        $config['property'] ?? self::DEFAULT_PROPERTY
-                    ],
-                    self::RESOLVE_FIELD
-                );
+                $config['resolve'] = $this->substituteResolve($config);
             }
 
-            $typesMap[$index] = $config;
+            $typesMap[$index] = array_filter(
+                $config,
+                function($property) {
+                    return in_array($property, ['type', 'resolve']);
+                },
+                ARRAY_FILTER_USE_KEY
+            );
         }
 
         $this->typesMap = $typesMap;
@@ -47,7 +44,7 @@ class ConfigurableFieldValueBuilder implements FieldValueBuilder
     {
         if (!isset($this->typesMap[$fieldDefinition->fieldTypeIdentifier])) {
             return $this->updateForField(
-                ['type' => self::DEFAULT_TYPE, 'resolve' => self::DEFAULT_RESOLVER],
+                ['type' => self::DEFAULT_TYPE, 'resolve' => $this->substituteResolve([])],
                 $fieldDefinition
             );
         }
@@ -64,5 +61,26 @@ class ConfigurableFieldValueBuilder implements FieldValueBuilder
         );
 
         return $configuration;
+    }
+
+    /**
+     * @param $config
+     * @return array
+     */
+    private function substituteResolve($config): string
+    {
+        return str_replace(
+            [
+                '%resolver%',
+                '%property%'
+            ],
+            [
+                $config['resolver'] ?? self::DEFAULT_RESOLVER,
+                $config['property'] ?? self::DEFAULT_PROPERTY
+            ],
+            isset($config['property']) && $config['property'] === false
+                ? self::RESOLVE_FIELD
+                : self::RESOLVE_FIELD_WITH_PROPERTY
+        );
     }
 }
